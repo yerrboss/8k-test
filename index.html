@@ -1,0 +1,298 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Salrayworks | 8K Core Control</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="salray-title-bar">
+      <div class="drag-region">
+        <span class="app-id">SALRAYWORKS // 8K CORE v1.0</span>
+      </div>
+      <div class="window-controls">
+        <button id="minBtn">—</button>
+        <button id="maxBtn">▢</button>
+        <button id="closeBtn">×</button>
+      </div>
+    </div>
+
+    <div class="app-container" id="mainApp">
+      <aside class="sidebar-left">
+        <div class="media-pool-container" style="display: flex; flex-direction: column; height: 100%">
+          <div class="panel-header">
+            <h2>Media Pool</h2>
+            <button class="btn-mini-add" title="Add Source">+</button>
+          </div>
+
+          <div class="media-list" id="mediaPoolList" style="flex: 1; padding: 10px; overflow-y: auto">
+            <div class="media-item active">
+              <div class="media-thumb">NDI</div>
+              <div class="media-meta">
+                <label>8K_MAIN_FEED</label>
+                <span>7680x4320 // 60 FPS</span>
+              </div>
+              <div class="media-status-dot"></div>
+            </div>
+
+            <div class="media-item">
+              <div class="media-thumb">FILE</div>
+              <div class="media-meta">
+                <label>TEST_PATTERN_V01</label>
+                <span>7680x4320 // PRORES</span>
+              </div>
+              <div class="media-status-dot offline"></div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="canvas-area">
+        <div id="galleryView">
+          <div class="panel-header">
+            <h2>Surface Templates // 8K Presets</h2>
+            <span class="status-tag">9 PRESETS</span>
+          </div>
+          <div class="template-grid">
+            <div class="template-card">
+              <div class="preview-box"><div class="standard-wall"></div></div>
+              <div class="card-info">
+                <span class="type">Standard 8K</span>
+                <span class="res">7680 x 4320</span>
+              </div>
+            </div>
+            <div class="template-card">
+              <div class="preview-box"><div class="wide-strip"></div></div>
+              <div class="card-info">
+                <span class="type">Cinema Strip</span>
+                <span class="res">15360 x 2160</span>
+              </div>
+            </div>
+            <div class="template-card">
+              <div class="preview-box">
+                <div class="cube-3d">
+                  <div class="cube-face top"></div>
+                  <div class="cube-face front"></div>
+                  <div class="cube-face side"></div>
+                </div>
+              </div>
+              <div class="card-info">
+                <span class="type">3D Cube</span>
+                <span class="res">3840 x 3840</span>
+              </div>
+            </div>
+            <div class="template-card">
+              <div class="preview-box">
+                <div class="curved-wall-icon"></div>
+              </div>
+              <div class="card-info">
+                <span class="type">Curved Wrap</span>
+                <span class="res">11520 x 2160</span>
+              </div>
+            </div>
+            <div class="template-card">
+              <div class="preview-box">
+                <div class="cube-3d">
+                  <div class="cube-face top"></div>
+                  <div class="cube-face front"></div>
+                  <div class="cube-face side"></div>
+                </div>
+              </div>
+              <div class="card-info">
+                <span class="type">Immersive Cube</span>
+                <span class="res">7680 x 7680</span>
+              </div>
+            </div>
+            <div class="template-card">
+              <div class="preview-box">
+                <div class="dual-stretch-icon"></div>
+              </div>
+              <div class="card-info">
+                <span class="type">Dual Stretch</span>
+                <span class="res">15360 x 4320</span>
+              </div>
+            </div>
+            <div class="template-card">
+              <div class="preview-box"><div class="pillars-icon"></div></div>
+              <div class="card-info">
+                <span class="type">Pillar Strips</span>
+                <span class="res">2160 x 7680</span>
+              </div>
+            </div>
+            <div class="template-card">
+              <div class="preview-box"><div class="square-icon"></div></div>
+              <div class="card-info">
+                <span class="type">Square Master</span>
+                <span class="res">8192 x 8192</span>
+              </div>
+            </div>
+            <div class="template-card">
+              <div class="preview-box"><div class="triangle-3d"></div></div>
+              <div class="card-info">
+                <span class="type">Triangle Prism</span>
+                <span class="res">5760 x 1920</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="workspaceView" style="display: none; height: 100%; flex-direction: column">
+          <div class="canvas-viewport" style="flex: 2; position: relative; display: flex; flex-direction: column; overflow: hidden;">
+            <div class="panel-header" style="background: rgba(0, 0, 0, 0.3); border-bottom: 1px solid var(--vada-border); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 10px 20px;">
+              <div style="display: flex; align-items: center; gap: 15px">
+                <button id="backBtn" class="btn-chevron-back">‹</button>
+                <div style="display: flex; flex-direction: column; justify-content: center; border-left: 1px solid #333; padding-left: 15px; height: 24px;">
+                  <span id="liveRes" style="font-size: 11px; color: var(--vada-accent); opacity: 0.9; font-family: monospace; letter-spacing: 1px;">7680 x 4320</span>
+                </div>
+              </div>
+              <div style="text-align: center">
+                <h2 id="activeTaskName" style="color: #eee; letter-spacing: 3px; font-weight: 500; margin: 0; text-transform: uppercase;">ACTIVE: STANDARD 8K</h2>
+              </div>
+              <div style="display: flex; justify-content: flex-end; align-items: center;">
+                <span class="status-tag active-pulse">LIVE</span>
+              </div>
+            </div>
+
+            <div class="canvas-stage" style="flex: 1; position: relative">
+              <div class="grid-dots"></div>
+              <div id="activeSurface" class="video-layer">
+                <div class="layer-info">8K_CORE_PROXIMITY</div>
+                <div class="transform-nodes">
+                  <div class="rotate-node"></div>
+                  <div class="node nw"></div><div class="node n"></div><div class="node ne"></div>
+                  <div class="node w"></div><div class="node e"></div>
+                  <div class="node sw"></div><div class="node s"></div><div class="node se"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="canvasResizer" class="sidebar-resizer horizontal"></div>
+
+          <div class="control-deck" id="bottomControlDeck" style="height: 250px; background: var(--vada-panel)">
+            <div class="panel-header">
+              <h2>Canvas Control Deck</h2>
+              <div class="deck-tabs">
+                <button class="tab-mini active">Mapping</button>
+                <button class="tab-mini">Color</button>
+                <button class="tab-mini">NDI Config</button>
+              </div>
+            </div>
+            <div class="deck-content">
+              <div class="bento-input mini"><label>X Offset</label><input type="number" value="0" id="posX" /></div>
+              <div class="bento-input mini"><label>Y Offset</label><input type="number" value="0" id="posY" /></div>
+              <div class="bento-input mini"><label>Scale Factor</label><input type="number" value="1.0" step="0.1" /></div>
+            </div>
+          </div>
+        </div>
+        <div class="scan-bar"></div>
+      </main>
+
+<aside class="sidebar-right">
+  <div id="architectPanel">
+    <div class="panel-header">
+      <h2>Canvas Architect</h2>
+      <span class="status-tag" id="canvasStatus">DRAFT</span>
+    </div>
+    <div class="bento-input"><label>Width</label><input type="number" id="canvasW" value="7680" /></div>
+    <div class="bento-input"><label>Height</label><input type="number" id="canvasH" value="4320" /></div>
+    <div style="padding: 10px 20px">
+      <button class="btn-primary-action" onclick="createCanvas()">CREATE NEW CANVAS</button>
+    </div>
+  </div>
+
+  <div id="inspectorPanel" style="display: none" class="fade-in-vada">
+    <div class="panel-header">
+      <h2 id="inspectorTitle">Inspector</h2>
+      <button id="exitInspBtn" class="btn-vada" style="margin: 0; padding: 4px 8px; font-size: 8px; width: auto">EXIT</button>
+    </div>
+    
+    <div class="bento-input">
+      <label>Mapping Mode</label>
+      <div class="salray-dropdown" id="mappingDropdown">
+        <div class="dropdown-selected">Pixel-to-Pixel</div>
+        <div class="dropdown-options">
+          <div class="option active" data-value="p2p">Pixel-to-Pixel</div>
+          <div class="option" data-value="stretch">Stretch to Fill</div>
+          <div class="option" data-value="fit">Fit to Viewport</div>
+          <div class="option" data-value="crop">Center Crop</div>
+        </div>
+      </div>
+      <div class="control-group">
+    <label>Mesh Density</label>
+    <select id="meshDensity" onchange="updateMeshResolution(this.value)">
+        <option value="2">2x2 (Corner Pin)</option>
+        <option value="4">4x4 (Basic Curve)</option>
+        <option value="8">8x8 (Complex Warp)</option>
+    </select>
+</div>
+    </div>
+
+    <div id="warpSection" style="padding: 10px 20px; border-top: 1px solid #222; margin-top: 10px;">
+      <span style="font-size: 9px; color: #666; letter-spacing: 1.5px; display: block; margin-bottom: 10px;">IMAGE PROCESSING</span>
+      
+      <div class="control-group" style="margin-bottom: 15px;">
+        <label style="font-size: 10px; color: #aaa; display: block; margin-bottom: 5px;">WARP ENGINE</label>
+        <button class="btn-vada" id="warpToggleBtn" onclick="window.toggleWarpEditor()" style="width: 100%; font-size: 10px; padding: 8px;">
+          ENABLE MESH EDITING
+        </button>
+      </div>
+
+      <div class="lock-container" style="justify-content: space-between; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 4px;">
+        <span style="font-size: 10px; color: #aaa;">REMOVE BACKGROUND</span>
+        <input type="checkbox" id="bgRemovalToggle" onchange="window.toggleBgRemoval(this.checked)" />
+      </div>
+    </div>
+  </div>
+
+  <div id="lockSection" style="display: none">
+    <div class="lock-container">
+      <span>LOCK CONFIG</span><input type="checkbox" id="lockToggle" />
+    </div>
+  </div>
+
+  <div style="margin-top: auto;"></div>
+
+  <div style="padding-bottom: 10px">
+    <div id="resetSection" style="display: none; padding: 0 20px 10px 20px;">
+      <button class="btn-danger-mini" onclick="window.hardResetWorkspace()">
+        RESET CONFIGURATION
+      </button>
+    </div>
+
+    <div style="padding: 0 20px 20px 20px;">
+      <button class="btn-vada" style="width: 100%;" onclick="toggleScanner()">
+        RUN SPATIAL SCAN
+      </button>
+    </div>
+  </div>
+</aside>
+    </div>
+
+    <div id="sourceTray" class="source-tray">
+      <div class="tray-header"><span>IMPORT ENGINE</span><button id="closeTrayBtn">×</button></div>
+      <div class="tray-options">
+        <div class="tray-opt" data-type="NDI">NDI® STREAM</div>
+        <div class="tray-opt" data-type="FILE">LOCAL VIDEO</div>
+        <div class="tray-opt" data-type="LIVE">LIVE CAPTURE</div>
+      </div>
+    </div>
+
+    <div id="contextMenu" class="salray-ctx">
+      <div class="ctx-item" id="ctxFront">Bring to Front</div>
+      <div class="ctx-item" id="ctxBack">Send to Back</div>
+      <div class="ctx-divider"></div>
+      <div class="ctx-item" id="ctxLock">Lock Layer</div>
+      <div class="ctx-item" id="ctxUnlock" style="display: none">Unlock Layer</div>
+      <div class="ctx-divider"></div>
+      <div class="ctx-item" id="ctxReset">Reset Transform</div>
+      <div class="ctx-item" id="ctxDelete" style="color: #ff4444">Delete Source</div>
+    </div>
+
+    <script src="render.js"></script>
+  </body>
+</html>

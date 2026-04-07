@@ -1,0 +1,905 @@
+/* ==========================================================================
+   1. VARIABLES & ROOT
+   ========================================================================== */
+:root {
+    --vada-black: #080808;
+    --vada-panel: #111111;
+    --vada-accent: #00f0ff; /* Cyber Cyan */
+    --vada-border: rgba(255, 255, 255, 0.08);
+    --vada-glass: rgba(20, 20, 20, 0.7);
+    --titlebar-height: 32px;
+}
+
+/* ==========================================================================
+   2. BASE STYLES
+   ========================================================================== */
+body {
+    margin: 0;
+    background-color: var(--vada-black);
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    letter-spacing: 0.5px;
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   3. LAYOUT STRUCTURE
+   ========================================================================== */
+.app-container {
+    margin-top: var(--titlebar-height);
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    height: calc(100vh - var(--titlebar-height));
+    gap: 1px;
+    background-color: var(--vada-border);
+}
+
+aside {
+    position: relative;
+    overflow: visible !important; /* CRITICAL: Allows the tray to slide OUT of the sidebar */
+    background-color: var(--vada-black);
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+}
+
+aside, main {
+    background-color: var(--vada-black);
+    display: flex;
+    flex-direction: column;
+}
+
+aside:last-child {
+    padding: 20px;
+}
+
+.panel-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--vada-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    -webkit-app-region: no-drag !important;
+}
+
+.panel-header h2 {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #888;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+/* ==========================================================================
+   4. TITLE BAR & WINDOW CONTROLS
+   ========================================================================== */
+.salray-title-bar {
+    height: var(--titlebar-height);
+    background: #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--vada-border);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+}
+
+.drag-region {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+    -webkit-app-region: drag; 
+}
+
+.app-id {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #666;
+    font-weight: bold;
+}
+
+.window-controls {
+    display: flex;
+    -webkit-app-region: no-drag !important; 
+    z-index: 10000;
+}
+
+.window-controls button {
+    background: transparent;
+    border: none;
+    color: #555;
+    width: 46px;
+    height: var(--titlebar-height);
+    cursor: pointer !important;
+    font-size: 14px;
+    transition: all 0.2s;
+    -webkit-app-region: no-drag !important;
+}
+
+.window-controls button:hover {
+    background: #222;
+    color: white;
+}
+
+/* ==========================================================================
+   5. THE CANVAS AREA & INTERACTIVE SURFACE
+   ========================================================================== */
+.canvas-area {
+    position: relative;
+    background: radial-gradient(circle at center, #111 0%, #080808 100%);
+    overflow: hidden;
+}
+
+.grid-dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--vada-border) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.canvas-stage {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #020202;
+    overflow: hidden;
+}
+
+#activeSurface {
+    position: absolute;
+    border: 2px solid var(--vada-accent);
+    background: rgba(0, 240, 255, 0.05);
+    box-shadow: 0 0 40px rgba(0, 240, 255, 0.1);
+    cursor: grab;
+    user-select: none;
+    z-index: 999;
+    -webkit-app-region: no-drag !important;
+}
+
+.layer-info {
+    position: absolute;
+    top: -25px;
+    left: 0;
+    font-size: 9px;
+    color: var(--vada-accent);
+    text-transform: uppercase;
+}
+
+/* ==========================================================================
+   6. TEMPLATE GRID & CARDS
+   ========================================================================== */
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.template-card {
+    background: var(--vada-panel);
+    border: 1px solid var(--vada-border);
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    -webkit-app-region: no-drag !important;
+}
+
+.template-card:hover { border-color: var(--vada-accent); transform: translateY(-5px); background: #16161c; }
+.template-card.active { border-color: var(--vada-accent); box-shadow: 0 0 20px rgba(0, 240, 255, 0.1); }
+
+.preview-box {
+    width: 100%; height: 120px; background: #050505; border-radius: 6px; margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.03);
+}
+
+/* Card Icons Styles */
+.standard-wall { background: linear-gradient(45deg, #111, #1a1a1a); border: 1px solid var(--vada-accent); width: 80%; height: 50px; }
+.wide-strip { background: #111; border: 1px solid var(--vada-accent); width: 90%; height: 20px; }
+.curved-wall-icon { border: 1px solid var(--vada-accent); border-radius: 50% 50% 0 0 / 20% 20% 0 0; width: 80%; height: 40px; }
+.dual-stretch-icon { border: 1px solid var(--vada-accent); width: 90%; height: 25px; background: linear-gradient(90deg, transparent 49%, var(--vada-border) 50%, transparent 51%); }
+.pillars-icon { display: flex; gap: 10px; }
+.pillars-icon::before, .pillars-icon::after { content: ''; width: 10px; height: 50px; border: 1px solid var(--vada-accent); }
+.square-icon { width: 50px; height: 50px; border: 1px solid var(--vada-accent); }
+
+/* Cube 3D Styles */
+.cube-3d { position: relative; width: 50px; height: 50px; transform: rotateX(-20deg) rotateY(25deg); transform-style: preserve-3d; }
+.cube-face { position: absolute; width: 30px; height: 30px; border: 1px solid var(--vada-accent); background: rgba(0, 240, 255, 0.05); }
+.top { transform: rotateX(90deg) translateZ(15px); }
+.front { transform: translateZ(15px); }
+.side { transform: rotateY(90deg) translateZ(15px); }
+
+/* Triangle 3D Styles */
+.triangle-3d { width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 50px solid transparent; position: relative; filter: drop-shadow(0 0 5px var(--vada-accent)); }
+.triangle-3d::after { content: ''; position: absolute; top: 0; left: -30px; width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 50px solid var(--vada-accent); }
+
+/* ==========================================================================
+   7. MEDIA POOL & LISTS 
+   ========================================================================== */
+.btn-mini-add { 
+    background: transparent; border: 1px solid #333; color: #666; font-size: 8px;
+    text-transform: uppercase; padding: 4px 10px; cursor: pointer !important; border-radius: 4px;
+    position: relative;
+    z-index: 99999 !important;
+    pointer-events: auto !important;
+    -webkit-app-region: no-drag !important;
+    cursor: pointer !important;
+}
+.btn-mini-add:hover { color: white; border-color: #666; }
+
+.media-item {
+    display: flex; align-items: center; padding: 10px; background: rgba(255,255,255,0.02);
+    border: 1px solid var(--vada-border); border-radius: 6px; margin-bottom: 8px; cursor: pointer !important;
+}
+.media-item:hover { background: rgba(0, 240, 255, 0.05); border-color: #333; }
+.media-item.active { border-color: var(--vada-accent); background: rgba(0, 240, 255, 0.08); }
+
+.media-thumb { width: 40px; height: 30px; background: #000; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: #444; border: 1px solid #222; }
+.media-meta { flex: 1; margin-left: 12px; }
+.media-meta label { display: block; font-size: 10px; color: #eee; cursor: pointer; }
+.media-meta span { font-size: 8px; color: #555; text-transform: uppercase; }
+.media-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--vada-accent); box-shadow: 0 0 5px var(--vada-accent); }
+
+/* ==========================================================================
+   8. CONTROL DECK & TABS
+   ========================================================================== */
+.deck-tabs { display: flex; gap: 5px; }
+.tab-mini {
+    background: transparent; border: 1px solid #333; color: #666; font-size: 8px;
+    text-transform: uppercase; padding: 4px 10px; cursor: pointer !important; border-radius: 4px;
+}
+.tab-mini.active { border-color: var(--vada-accent); color: var(--vada-accent); }
+
+/* ==========================================================================
+   9. BENTO INPUTS & LOCK CONFIG (RESTORED)
+   ========================================================================== */
+.bento-input {
+    background: var(--vada-panel); border: 1px solid var(--vada-border);
+    padding: 15px; margin: 10px 20px; border-radius: 8px; -webkit-app-region: no-drag !important;
+}
+.bento-input label { display: block; font-size: 9px; color: #666; margin-bottom: 8px; }
+.bento-input input { background: transparent; border: none; color: white; font-size: 24px; font-weight: 300; width: 100%; outline: none; }
+.bento-input.mini { margin: 0; padding: 10px; flex: 1; min-width: 120px; }
+.bento-input.mini input { font-size: 16px; }
+
+/* LOCK CONFIG DESIGN */
+.lock-container {
+    margin: 10px 20px;
+    padding: 12px 15px;
+    background: #111;
+    border: 1px solid var(--vada-border);
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    -webkit-app-region: no-drag !important;
+}
+.lock-container span {
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #888;
+    text-transform: uppercase;
+}
+#lockToggle {
+    width: 20px;
+    height: 20px;
+    cursor: pointer !important;
+    accent-color: var(--vada-accent);
+}
+
+/* ==========================================================================
+   10. BUTTONS & ANIMATIONS
+   ========================================================================== */
+.btn-primary-action {
+    width: calc(100% - 40px); margin: 10px 20px; padding: 18px !important; border-radius: 8px;
+    border: 2px solid var(--vada-accent); background: transparent; color: var(--vada-accent);
+    text-transform: uppercase; font-size: 11px; font-weight: bold; cursor: pointer !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); -webkit-app-region: no-drag !important;
+}
+.btn-primary-action:hover { background: rgba(0, 240, 255, 0.1); box-shadow: 0 0 25px rgba(0, 240, 255, 0.2); transform: scale(1.02); }
+
+.btn-vada {
+    width: 100%; /* Spans the full width of the parent's inner area */
+    margin: 10px 0; /* Remove horizontal margins, only keep vertical spacing if needed */
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--vada-accent);
+    background: transparent;
+    color: var(--vada-accent);
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btn-vada:hover { background: var(--vada-accent); color: black; box-shadow: 0 0 15px var(--vada-accent); }
+
+.btn-chevron-back {
+    background: transparent; border: none; color: #555; font-size: 28px; line-height: 1;
+    cursor: pointer !important; display: flex; align-items: center; justify-content: center;
+    -webkit-app-region: no-drag !important;
+}
+.btn-chevron-back:hover { color: var(--vada-accent); transform: translateX(-2px); }
+
+/* ANIMATIONS */
+.status-tag { font-size: 9px; font-weight: bold; letter-spacing: 1px; color: #444; border: 1px solid var(--vada-border); padding: 2px 8px; border-radius: 4px; }
+.active-pulse { color: var(--vada-accent) !important; border-color: var(--vada-accent) !important; animation: pulse 2s infinite; }
+.scan-bar { position: absolute; width: 100%; height: 1px; background: var(--vada-accent); box-shadow: 0 0 10px var(--vada-accent); top: -10px; display: none; }
+.scanning .scan-bar { display: block; animation: vadaScan 4s infinite; }
+
+@keyframes vadaScan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+.corner-nodes span { position: absolute; width: 6px; height: 6px; background: var(--vada-accent); border: 1px solid black; }
+.corner-nodes span:nth-child(1) { top: -3px; left: -3px; }
+.corner-nodes span:nth-child(2) { top: -3px; right: -3px; }
+.corner-nodes span:nth-child(3) { bottom: -3px; left: -3px; }
+.corner-nodes span:nth-child(4) { bottom: -3px; right: -3px; }
+
+.source-tray {
+    position: absolute;
+    /* Position it exactly where the sidebar ends */
+    left: 280px; 
+    top: 70px; /* Adjust this to align with your + button row */
+    width: 200px;
+    
+    background: rgba(10, 10, 10, 0.98);
+    backdrop-filter: blur(25px);
+    border: 1px solid var(--vada-accent);
+    border-left: 2px solid var(--vada-accent);
+    
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+    z-index: 99999; /* Ensure it stays above the canvas grid */
+    
+    /* Animation: Slide out from behind the sidebar */
+    transform: translateX(-100%); 
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.source-tray.open {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.app-container {
+    overflow: visible; /* Prevents the tray from being cut off by the main window grid */
+}
+
+.tray-header {
+    padding: 10px;
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--vada-accent);
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--vada-border);
+}
+
+.tray-opt {
+    padding: 12px;
+    font-size: 10px;
+    color: #888;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.tray-opt:hover {
+    background: rgba(0, 240, 255, 0.1);
+    color: #fff;
+    padding-left: 18px; /* Subtle "slide" effect on hover */
+}
+
+#closeTrayBtn {
+    background: none; border: none; color: #555; cursor: pointer;
+}
+
+/* ==========================================================================
+   RESTORED: TEMPLATE GALLERY TITLES & INFO
+   ========================================================================== */
+
+.card-info {
+    padding-top: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.card-info .type {
+    display: block;
+    font-size: 11px;
+    font-weight: 700; /* Bold for hierarchy */
+    color: #ffffff;   /* High contrast */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.card-info .res {
+    display: block;
+    font-size: 9px;
+    font-weight: 400;
+    color: var(--vada-accent); /* Cyan accent for the technical spec */
+    opacity: 0.8;
+    font-family: monospace;
+}
+
+/* Ensure the card header in the gallery looks correct */
+#galleryView .panel-header h2 {
+    font-size: 11px;
+    color: #eee;
+    letter-spacing: 2px;
+}
+
+#galleryView .status-tag {
+    background: rgba(0, 240, 255, 0.1);
+    color: var(--vada-accent);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+/* Sidebar Layout Adjustment */
+
+/* The top section (Media Pool) */
+.media-pool-section {
+    flex: 0 0 40%; /* Initial height */
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--vada-border);
+}
+
+/* THE RESIZER BAR */
+.sidebar-resizer {
+    height: 6px;
+    background: #1a1a1a;
+    cursor: ns-resize; /* North-South Resize cursor */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    z-index: 100;
+}
+
+.sidebar-resizer:hover {
+    background: var(--vada-accent);
+}
+
+.sidebar-resizer::after {
+    content: '';
+    width: 30px;
+    height: 2px;
+    background: #333;
+    border-radius: 2px;
+}
+
+/* The bottom section (Control Center / Inspector) */
+.control-deck-section {
+    flex: 1; /* Takes up remaining space */
+    overflow-y: auto;
+    padding-bottom: 20px;
+}
+
+/* Custom Salrayworks Dropdown */
+.salray-dropdown {
+    position: relative;
+    width: 100%;
+    cursor: pointer !important;
+    user-select: none;
+    -webkit-app-region: no-drag !important;
+}
+
+.dropdown-selected {
+    padding: 10px 0;
+    font-size: 14px;
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: border-color 0.2s;
+}
+
+.dropdown-selected::after {
+    content: '▼';
+    font-size: 8px;
+    color: var(--vada-accent);
+    transition: transform 0.3s;
+}
+
+.salray-dropdown.open .dropdown-selected {
+    border-color: var(--vada-accent);
+}
+
+.salray-dropdown.open .dropdown-selected::after {
+    transform: rotate(180deg);
+}
+
+.dropdown-options {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: -10px;
+    right: -10px;
+    background: #151515;
+    border: 1px solid var(--vada-accent);
+    border-radius: 4px;
+    display: none;
+    flex-direction: column;
+    z-index: 5000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    overflow: hidden;
+}
+
+.salray-dropdown.open .dropdown-options {
+    display: flex;
+}
+
+.option {
+    padding: 12px 15px;
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+}
+
+.option:hover {
+    background: rgba(0, 240, 255, 0.1);
+    color: #fff;
+    padding-left: 20px;
+}
+
+.option.active {
+    color: var(--vada-accent);
+    background: rgba(0, 240, 255, 0.05);
+}
+
+/* 9-Point Transform Handles */
+.transform-nodes {
+    position: absolute;
+    inset: -5px;
+    pointer-events: none;
+    display: none; /* Only show on active/hover */
+}
+
+.video-layer.active .transform-nodes,
+.video-layer:hover .transform-nodes {
+    display: block;
+}
+
+.node {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #000;
+    border: 2px solid var(--vada-accent);
+    pointer-events: auto;
+    z-index: 1000;
+}
+
+/* Position Handles */
+.nw { top: 0; left: 0; cursor: nw-resize; }
+.n  { top: 0; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+.ne { top: 0; right: 0; cursor: ne-resize; }
+.w  { top: 50%; left: 0; transform: translateY(-50%); cursor: w-resize; }
+.e  { top: 50%; right: 0; transform: translateY(-50%); cursor: e-resize; }
+.sw { bottom: 0; left: 0; cursor: sw-resize; }
+.s  { bottom: 0; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+.se { bottom: 0; right: 0; cursor: se-resize; }
+
+/* Custom Context Menu */
+#contextMenu {
+    position: fixed;
+    display: none;
+    background: #111;
+    border: 1px solid var(--vada-accent);
+    width: 180px;
+    z-index: 10000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    padding: 5px 0;
+}
+
+.ctx-item {
+    padding: 8px 15px;
+    font-size: 10px;
+    color: #ccc;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.ctx-item:hover {
+    background: var(--vada-accent);
+    color: #000;
+}
+
+.ctx-divider {
+    height: 1px;
+    background: var(--vada-border);
+    margin: 5px 0;
+}
+
+/* Hide handles when locked */
+.video-layer.is-locked .transform-nodes {
+    display: none !important;
+}
+
+/* Optional: Visual cue for locked layers */
+.video-layer.is-locked {
+    border-color: #ff4444 !important; /* Red border for locked */
+    cursor: not-allowed !important;
+}
+
+/* Rotation Handle Styles */
+/* THE UNIVERSAL ROTATION ICON */
+.rotate-node {
+    position: absolute;
+    top: -45px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    cursor: alias; 
+    pointer-events: auto;
+    z-index: 1005;
+    transition: all 0.2s;
+}
+
+/* The Curved Arrow Body */
+.rotate-node::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border: 1.5px solid var(--vada-accent);
+    border-radius: 50%;
+    border-top-color: transparent; /* Creates the gap in the circle */
+    transform: rotate(45deg);
+}
+
+/* The Arrow Head */
+.rotate-node::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid var(--vada-accent);
+    transform: rotate(-45deg);
+}
+
+/* The Slim Connection Line (Antenna) */
+.rotate-node-line {
+    position: absolute;
+    bottom: -25px; /* Adjust to meet the top node */
+    left: 50%;
+    width: 1px;
+    height: 25px;
+    background: linear-gradient(to top, var(--vada-accent), transparent);
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.rotate-node:hover {
+    filter: drop-shadow(0 0 5px var(--vada-accent));
+    transform: translateX(-50%) scale(1.15);
+}
+
+/* RESET BUTTON DESIGN */
+/* Sidebar Container Fix */
+aside.sidebar-right {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* SMALLER, DISCREET RESET BUTTON */
+.btn-danger-mini {
+    width: 100%;
+    padding: 8px; 
+    background: transparent;
+    border: 1px solid #331111; /* Subtle dark red border */
+    border-radius: 4px;
+    color: #663333; /* Dimmed text */
+    text-transform: uppercase;
+    font-size: 8px; /* Small font size */
+    font-weight: bold;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* WARNING HOVER STATE */
+.btn-danger-mini:hover {
+    background: #ff4444; /* Bright Red on Hover */
+    color: #000;         /* High contrast black text */
+    border-color: #ff4444;
+    box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+}
+
+/* PERSISTENT NODES ON LOCK (AS REQUESTED) */
+.video-layer.is-locked .node,
+.video-layer.is-locked .rotate-node {
+    display: block !important; /* Force visibility even when locked */
+    opacity: 0.3;              /* Dimmed appearance */
+    border-color: #ff4444;     /* Red tint to show lock status */
+    cursor: not-allowed;       /* Visual cue that it won't move */
+}
+
+/* Adjust the rotation arrow colors specifically for locked state */
+.video-layer.is-locked .rotate-node::after,
+.video-layer.is-locked .rotate-node::before {
+    border-color: #ff4444;
+    border-top-color: transparent;
+}
+.video-layer.is-locked .rotate-node::before {
+    border-top-color: #ff4444;
+}
+
+.chroma-video-preview video {
+    /* ... existing object-fit: cover; ... */
+    
+    /* CRITICAL: Ensures it rotates around the center regardless of scale */
+    transform-origin: center center;
+    
+    /* Prevents the 'jitter' during hardware acceleration */
+    
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+#v-preview, #v-program, .chroma-video-preview video {
+    /* Force the anchor point to the dead center */
+    transform-origin: center center !important;
+    
+    /* Hardware acceleration to prevent "shaking" or "jagged edges" during rotation */
+    will-change: transform;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
+.moveable-source {
+    transform-origin: center center !important;
+    /* Force GPU rendering to stop sub-pixel jumping */
+    will-change: transform, width, height;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
+/* Ensure these start hidden until enterWorkspace() is called */
+#lockSection, 
+#resetSection, 
+#inspectorPanel {
+    display: none;
+}
+
+/* ==========================================================================
+   WARP ENGINE: FIGMA-STYLE MESH EDITOR
+   ========================================================================== */
+
+/* The main corner points (Vertices) */
+.warp-dot {
+    width: 14px !important;
+    height: 14px !important;
+    background: #ffffff !important;
+    border: 2px solid #00f0ff !important; /* Force Cyan */
+    position: absolute !important;
+    border-radius: 50% !important;
+    z-index: 999999 !important; 
+    cursor: move !important;
+    display: block !important;
+    pointer-events: auto !important;
+}
+.warp-dot:hover {
+    background: var(--vada-accent);
+}
+
+/* Ensure the dots are prioritized by the mouse */
+.warp-dot, .tangent {
+    pointer-events: auto !important;
+    z-index: 99999 !important;
+}
+
+/* Specific Corner Positions */
+.warp-dot.tl { top: -6px; left: -6px; }
+.warp-dot.tr { top: -6px; right: -6px; }
+.warp-dot.bl { bottom: -6px; left: -6px; }
+.warp-dot.br { bottom: -6px; right: -6px; }
+
+/* Tangent Handles - The Curve Controllers */
+.tangent {
+    width: 12px !important;
+    height: 12px !important;
+    background: #00f0ff !important;
+    border: 2px solid #ffffff !important;
+    position: absolute !important;
+    border-radius: 50% !important;
+    z-index: 999999 !important;
+    cursor: crosshair !important;
+    display: block !important;
+    pointer-events: auto !important;
+}
+
+.tangent:hover {
+    background: #ffffff;
+    box-shadow: 0 0 8px var(--vada-accent);
+    transform: scale(1.2);
+}
+
+/* Position them specifically so they aren't hidden under the corner */
+.t-left { left: -40px !important; top: 0px !important; }
+.t-right { right: -40px !important; top: 0px !important; }
+
+/* The visual connection arm */
+.tangent::before {
+    content: '' !important;
+    position: absolute !important;
+    height: 2px !important;
+    background: rgba(0, 240, 255, 0.8) !important;
+    top: 5px !important;
+    width: 40px !important;
+    z-index: -1 !important;
+}
+.t-left::before { left: 10px !important; }
+.t-right::before { right: 10px !important; }
+
+/* ==========================================================================
+   ACTIVE VISUAL STATES
+   ========================================================================== */
+   .video-layer {
+    position: absolute;
+    /* CHANGE THIS: Must be visible to see the dots on the edges */
+    overflow: visible !important; 
+    transform-origin: center center;
+    /* ... rest of your styles ... */
+}
+/* Active Warp State */
+.video-layer.warp-mode {
+    border: 1px dashed rgba(255, 255, 255, 0.8) !important;
+    background: rgba(0, 240, 255, 0.12) !important;
+    cursor: default; /* Change from grab to default when in mesh mode */
+}
+
+/* CRITICAL: Block standard handle nodes during warp mode */
+.video-layer.warp-mode .transform-nodes {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+/* AI Background Removal Feedback */
+.ai-bg-removing {
+    box-shadow: 0 0 30px var(--vada-accent);
+    outline: 2px solid var(--vada-accent);
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.ai-bg-removing::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, 
+        transparent 0%, 
+        var(--vada-accent) 50%, 
+        transparent 100%);
+    background-size: 100% 200%;
+    opacity: 0.15;
+    animation: bgScan 2.5s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes bgScan {
+    0% { background-position: 0% -100%; }
+    100% { background-position: 0% 100%; }
+}
