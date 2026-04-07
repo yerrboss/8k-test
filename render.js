@@ -1,11 +1,3 @@
-// This check prevents the app from crashing in a regular browser (Netlify)
-const ipcRenderer = (typeof window !== 'undefined' && window.process && window.process.type) 
-    ? require("electron").ipcRenderer 
-    : { send: (cmd, data) => console.log(`[Web Demo] IPC Bridge: ${cmd}`, data) };
-
-
-
-
 const { ipcRenderer } = require("electron");
 
 /* ==========================================================================
